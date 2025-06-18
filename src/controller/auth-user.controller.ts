@@ -5,15 +5,27 @@ import { validateRegisterData } from "../utils/validateSchema/validateUser";
 import { authUserLogin, authUserRegister } from "../services/auth-user.service";
 import { _comparePassword } from "../utils/auth/hasher";
 import { _generateToken } from "../utils/auth/token.helper";
+import cloudinary from "../config/cloudinary";
+import { uploadImg } from "../utils/avatar-helper";
 
 export const userRegisterController = async (req: Request, res: Response) => {
   try {
     const validatedData = await validateRegisterData.validate(req.body, {
       abortEarly: false,
     });
-    const { name, email, password, avatar } = validatedData;
+    const { name, email, password } = validatedData;
 
-    const user = await authUserRegister(name, email, password, avatar);
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name
+    )}&background=random`;
+    const cloudinaryResult = await uploadImg(avatarUrl);
+
+    const user = await authUserRegister(
+      name,
+      email,
+      password,
+      cloudinaryResult.secure_url
+    );
     response(res, HttpStatus.CREATED, {
       message: "User created successfully",
       success: true,

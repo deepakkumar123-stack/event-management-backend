@@ -10,5 +10,4 @@ export const validateRegisterData = Yup.object({
   password: Yup.string()
     .required("Password must be required")
     .min(6, "Password must be at least 6 characters"),
-  avatar: Yup.string().required("avatar must be required"),
 });

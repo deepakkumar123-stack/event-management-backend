@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   createEvent,
   deleteEventbyId,
+  getEventById,
   getEvents,
   updateEvent,
 } from "../services/event.service";
@@ -38,6 +39,25 @@ export const getEventsController = async (req: Request, res: Response) => {
     console.log("error in  fetch event controller");
     response(res, HttpStatus.BAD_REQUEST, {
       message: "Error in fetch  events",
+      success: false,
+      data: error.message,
+    });
+  }
+};
+
+export const getEventController = async (req: Request, res: Response) => {
+  const eventId = req.params._id;
+  try {
+    const events = await getEventById(eventId);
+    response(res, HttpStatus.OK, {
+      message: "your event",
+      success: true,
+      data: events,
+    });
+  } catch (error: any) {
+    console.log("error in  fetch event by id controller");
+    response(res, HttpStatus.BAD_REQUEST, {
+      message: "Error in fetch  event by id",
       success: false,
       data: error.message,
     });
