@@ -6,8 +6,8 @@ import { UserType } from "../types/user.type";
 
 export const getEvents = async (
   categories: string[] = [],
-  startDate?: string,
-  endDate?: string,
+  startDate: string,
+  endDate: string,
   limit: number = 8,
   skip: number = 0
 ): Promise<EventType | {}> => {
@@ -43,6 +43,22 @@ export const getEvents = async (
     return events;
   } catch (error) {
     console.log("error occur in get events service");
+    throw error;
+  }
+};
+
+export const getEventById = async (eventId: string) => {
+  try {
+    const event = await Events.findById(eventId).populate(["categories"]);
+
+    console.log(event, "njnnidsajid");
+    if (!event) {
+      console.log("Event not found");
+      throw new Error(` not found`);
+    }
+    return event;
+  } catch (error) {
+    console.log("error occur in get event service");
     throw error;
   }
 };

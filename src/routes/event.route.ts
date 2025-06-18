@@ -2,6 +2,7 @@ import express from "express";
 import {
   createEventController,
   deleteEventController,
+  getEventController,
   getEventsController,
   updateEventController,
 } from "../controller/event.controller";
@@ -11,6 +12,7 @@ import { upload } from "../middleware/multer";
 export const eventRouter = express.Router();
 
 eventRouter.get("/", getEventsController);
+eventRouter.get("/:_id", getEventController);
 eventRouter.post(
   "/",
   authMiddleware,
