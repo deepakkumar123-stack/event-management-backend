@@ -32,10 +32,17 @@ export const getEvents = async (
   console.log(filter);
   try {
     const events = await Events.find(filter)
-      .populate(["categories"])
+      .populate([
+        {
+          path: "categories",
+        },
+        {
+          path: "createdBy",
+          select: "-password", // exclude password field
+        },
+      ])
       .skip(skip)
       .limit(limit);
-    console.log(events, "njnnidsajid");
     if (!events) {
       console.log("Events not found");
       throw new Error(`Events not found`);
@@ -49,7 +56,15 @@ export const getEvents = async (
 
 export const getEventById = async (eventId: string) => {
   try {
-    const event = await Events.findById(eventId).populate(["categories"]);
+    const event = await Events.findById(eventId).populate([
+      {
+        path: "categories",
+      },
+      {
+        path: "createdBy",
+        select: "-password", // exclude password field
+      },
+    ]);
 
     console.log(event, "njnnidsajid");
     if (!event) {
@@ -80,12 +95,6 @@ export const createEvent = async (
       categories: categories.map((cat) => cat._id),
       createdBy: createdBy,
     });
-
-    // console.log(
-    //   "Final category IDs:",
-    //   categories.map((c) => c._id?.toString())
-    // );
-    // console.log("server user create id", createdBy);
 
     return await newEvent.save();
   } catch (error) {

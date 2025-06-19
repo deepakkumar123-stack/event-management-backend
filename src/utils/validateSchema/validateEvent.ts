@@ -10,8 +10,8 @@ export const validateEventData = Yup.object({
     .min(10, "Description must be at least 10 characters"),
 
   location: Yup.string().required("Location is required"),
-  categories: Yup.array()
-    .of(Yup.string().required("Each category ID must be a string"))
-    .min(1, "At least one category is required")
-    .required("Categories field is required"),
+  categories: Yup.string(),
+  // .of(Yup.string().required("Each category ID must be a string"))
+  // .min(1, "At least one category is required")
+  // .required("Categories field is required"),
 });

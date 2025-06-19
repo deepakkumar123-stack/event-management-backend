@@ -18,15 +18,13 @@ export const getEventsController = async (req: Request, res: Response) => {
   const limit = parseInt(req.query.limit as string) || 8;
   const skip = (page - 1) * limit;
 
-  const categoriesString = req?.query?.categories as string | undefined;
-  const start = req?.query?.startDate as string | undefined;
-  const end = req?.query?.endDate as string | undefined;
+  const categoriesString = req?.query?.categories as string | "";
+  const start = req?.query?.startDate as string | "";
+  const end = req?.query?.endDate as string | "";
 
   const categories = categoriesString ? categoriesString.split(",") : [];
   const startDate = start ? start : "";
   const endDate = end ? end : "";
-
-  // console.log("sd", categoriesString, categories);
 
   try {
     const events = await getEvents(categories, startDate, endDate, limit, skip);
@@ -65,15 +63,11 @@ export const getEventController = async (req: Request, res: Response) => {
 };
 
 export const createEventController = async (req: Request, res: Response) => {
-  // console.log("test", req.body);
-  // const { createdBy } = req.body;
   const createdBy = (req as any).user;
 
-  // console.log("user create ", createdBy);
   try {
     //for banner
     const file = req.file;
-    // console.log("file request:", file);
     if (!file) {
       return response(res, HttpStatus.FORBIDDEN, {
         message: "Banner is required",
@@ -86,15 +80,12 @@ export const createEventController = async (req: Request, res: Response) => {
     try {
       uploaded = await new Promise<{ secure_url: string }>(
         (resolve, reject) => {
-          // console.log("test1");
           const stream = cloudinary.uploader.upload_stream(
             { folder: "upload" },
             (err, result) => {
               if (err || !result) {
-                // console.error("Cloudinary error:", err);
                 return reject(err || new Error("Upload failed"));
               }
-              // console.log("test2");
               resolve(result);
             }
           );
@@ -110,17 +101,14 @@ export const createEventController = async (req: Request, res: Response) => {
       });
     }
     console.log(req.body);
-    // console.log("uploaded:", uploaded);
     const validateEvent = await validateEventData.validate(req.body, {
       abortEarly: false,
     });
     const { title, description, location, categories } = validateEvent;
     console.log("categories", categories);
     const categoriesData = await Categories.find({
-      _id: { $in: categories },
+      _id: { $in: categories?.split(",") },
     });
-    console.log("categoriestest", categoriesData);
-    // console.log("test2727");
     const newEvent = await createEvent(
       title,
       description,
@@ -130,7 +118,6 @@ export const createEventController = async (req: Request, res: Response) => {
       createdBy
     );
 
-    console.log("event in controller", newEvent, uploaded.secure_url);
     response(res, HttpStatus.CREATED, {
       message: "event created successfully....",
       success: true,
@@ -149,9 +136,10 @@ export const createEventController = async (req: Request, res: Response) => {
 //for delete event by owner
 export const deleteEventController = async (req: Request, res: Response) => {
   const eventId = req.params._id;
-  // console.log("event id ", eventId);
 
   const userId = (req as any).user;
+  console.log(eventId);
+  console.log("login user id", userId);
 
   try {
     const event = await Events.findById(eventId);
@@ -163,8 +151,7 @@ export const deleteEventController = async (req: Request, res: Response) => {
         data: null,
       });
     }
-    // console.log("event user id", event?.createdBy._id?.toString());
-    // console.log("user id", userId);
+    console.log("event user id", event?.createdBy._id);
     if (event?.createdBy._id?.toString() !== userId) {
       return response(res, HttpStatus.FORBIDDEN, {
         message: "You are not allowed to delete this event",
@@ -189,7 +176,6 @@ export const deleteEventController = async (req: Request, res: Response) => {
 };
 export const updateEventController = async (req: Request, res: Response) => {
   const eventId = req.params._id;
-  // console.log("event id ", eventId);
 
   const userId = (req as any).user;
 
@@ -220,8 +206,9 @@ export const updateEventController = async (req: Request, res: Response) => {
     });
     const { title, description, location, categories } = validateEvent;
     const categoriesData = await Categories.find({
-      _id: { $in: categories },
+      _id: { $in: categories?.split(",") },
     });
+    console.log("categories::", categoriesData);
     const event = await Events.findById(eventId);
 
     if (!event) {
@@ -231,9 +218,6 @@ export const updateEventController = async (req: Request, res: Response) => {
         data: null,
       });
     }
-    // console.log("event user id", event?.createdBy._id?.toString());
-    // console.log("user id", userId);
-
     if (event?.createdBy._id?.toString() !== userId) {
       return response(res, HttpStatus.FORBIDDEN, {
         message:
