@@ -32,7 +32,6 @@ export const userRegisterController = async (req: Request, res: Response) => {
       data: user,
     });
   } catch (error: any) {
-    // console.log(error, "error from create user catch block");
     response(
       res,
       HttpStatus.BAD_REQUEST,
@@ -56,13 +55,22 @@ export const userLoginController = async (req: Request, res: Response) => {
       userId: user?._id,
       userName: user?.name,
       userEmail: user?.email,
+      userAvatar: user.avatar,
     };
     const token = _generateToken(payload);
 
     response(res, HttpStatus.OK, {
       message: "Login successful",
       success: true,
-      data: { token },
+      data: {
+        token,
+        user: {
+          _id: payload.userId,
+          name: payload.userName,
+          email: payload.userEmail,
+          avatar: payload.userAvatar,
+        },
+      },
     });
   } catch (error: any) {
     response(
